@@ -1,0 +1,28 @@
+html {
+  scroll-behavior: smooth;
+}
+
+
+
+
+.card {
+  border: 1px solid #1a1a1a;
+  padding: 25px;
+  background: linear-gradient(145deg, #0d0d0d, #111);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: #C9A84C;
+}
+
+
+
+.section p {
+  font-size: 14px;
+}
+
+.section h2 {
+  font-family: 'Playfair Display', serif;
+}

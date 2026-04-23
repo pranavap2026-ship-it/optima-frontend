@@ -1,0 +1,30 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, rgba(201,168,76,0.1), #000);
+}
+
+.login-card {
+  width: 350px;
+  padding: 40px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.login-card input {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  background: #000;
+  border: 1px solid #333;
+  color: #fff;
+}
+
+.subtitle {
+  color: #888;
+  margin-bottom: 20px;
+}

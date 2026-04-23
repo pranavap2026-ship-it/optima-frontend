@@ -1,0 +1,296 @@
+/* 🔥 IMPORT PREMIUM FONT */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #111 0%, #000 100%);
+  color: #e8e0cc;
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* 🔥 HEADINGS (Luxury Look) */
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 1px;
+}
+
+/* 🔥 SECTION */
+.section {
+  padding: 100px 8%;
+}
+
+/* 🔥 GOLD TEXT */
+.gold {
+  color: #C9A84C;
+}
+
+/* 🔥 BUTTONS */
+.btn {
+  padding: 12px 30px;
+  border: 1px solid #C9A84C;
+  color: #C9A84C;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  background: #C9A84C;
+  color: black;
+}
+
+.btn.fill {
+  background: #C9A84C;
+  color: black;
+}
+
+.btn.fill:hover {
+  opacity: 0.85;
+}
+
+/* 🔥 CARDS (LUXURY STYLE) */
+.card {
+  border: 1px solid #1a1a1a;
+  padding: 25px;
+  background: linear-gradient(145deg, #0d0d0d, #111);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ✨ GOLD GLOW EFFECT */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  transition: 0.3s;
+}
+
+.card:hover::before {
+  border-color: #C9A84C;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* 🔥 INPUTS */
+input, textarea {
+  width: 100%;
+  padding: 14px;
+  background: #0d0d0d;
+  border: 1px solid #222;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #C9A84C;
+}
+
+/* 🔥 NAV LINKS */
+a {
+  text-decoration: none;
+  color: #aaa;
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #C9A84C;
+}
+
+/* 🔥 SCROLLBAR (Premium touch 😎) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9A84C;
+}
+
+
+/* DESKTOP */
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.menu-icon {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #C9A84C;
+}
+
+.desktop-btn {
+  display: block;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .desktop-btn {
+    display: none;
+  }
+
+  .menu-icon {
+    display: block;
+  }
+
+  .mobile-menu {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 30px;
+    text-align: center;
+    z-index: 999;
+  }
+
+  .mobile-menu a {
+    color: #fff;
+    font-size: 18px;
+  }
+}
+
+
+
+
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+section {
+  scroll-margin-top: 100px; /* 🔥 FIX OFFSET */
+}
+
+
+
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: #C9A84C;
+}
+
+#services {
+  scroll-margin-top: 100px;
+}
+
+#about {
+  scroll-margin-top: 100px;
+}
+
+
+.card {
+  border: 1px solid #1a1a1a;
+  background: linear-gradient(145deg, #0d0d0d, #111);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ✨ GLOW HOVER */
+.card:hover {
+  transform: translateY(-8px) scale(1.03);
+  border-color: #C9A84C;
+  box-shadow: 0 10px 30px rgba(201,168,76,0.1);
+}
+
+
+section {
+  scroll-margin-top: 120px;
+}
+
+
+
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+.card {
+  background: #0a0a0a;
+  border: 1px solid #222;
+  border-radius: 10px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #000;
+  border: 1px solid #222;
+  color: #fff;
+}
+
+
+
+
+.bg-3d {
+  position: absolute;
+  inset: 0;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: -20%;
+  background-size: cover;
+  background-position: center;
+  will-change: transform;
+}
+
+/* 🔥 Depth layers */
+.layer-back {
+  background: radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%);
+  transform: translateZ(-200px) scale(1.5);
+}
+
+.layer-mid {
+  background: url("https://www.transparenttextures.com/patterns/asfalt-light.png");
+  opacity: 0.2;
+  transform: translateZ(-100px) scale(1.2);
+}
+
+.layer-front {
+  background: radial-gradient(circle at 30% 30%, rgba(201,168,76,0.2), transparent);
+  transform: translateZ(0);
+}
