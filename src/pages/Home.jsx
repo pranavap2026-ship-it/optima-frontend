@@ -8,8 +8,7 @@ export default function Home() {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [intro, setIntro] = useState(true); // 🎬 intro state
+  const [intro, setIntro] = useState(true);
 
   const navigate = useNavigate();
 
@@ -17,15 +16,12 @@ export default function Home() {
      🎬 INTRO ANIMATION
   =============================== */
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIntro(false);
-    }, 2500); // duration
-
+    const timer = setTimeout(() => setIntro(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
   /* ===============================
-     🔐 SECRET TAP
+     🔐 SECRET TAP (MOBILE + DESKTOP)
   =============================== */
   const tapCount = useRef(0);
   const lastTap = useRef(0);
@@ -33,17 +29,32 @@ export default function Home() {
   const handleSecretTap = (e) => {
     const now = Date.now();
 
-    if (e.clientX < window.innerWidth - 50) return;
-    if (e.clientY < window.innerHeight - 50) return;
+    let x, y;
 
-    if (now - lastTap.current > 600) {
+    // 📱 MOBILE TOUCH
+    if (e.touches && e.touches.length > 0) {
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
+    } else {
+      // 💻 DESKTOP
+      x = e.clientX;
+      y = e.clientY;
+    }
+
+    // 🎯 bottom-right detection (60px zone)
+    if (x < window.innerWidth - 60) return;
+    if (y < window.innerHeight - 60) return;
+
+    // ⏱ reset if slow
+    if (now - lastTap.current > 700) {
       tapCount.current = 0;
     }
 
     tapCount.current++;
     lastTap.current = now;
 
-    if (tapCount.current >= 7) {
+    // 🔥 6 taps trigger
+    if (tapCount.current >= 6) {
       openAdminAccess();
       tapCount.current = 0;
     }
@@ -60,7 +71,7 @@ export default function Home() {
   };
 
   /* ===============================
-     ⌨️ SECRET KEY
+     ⌨️ SECRET KEY (DESKTOP)
   =============================== */
   useEffect(() => {
     const handleKey = (e) => {
@@ -103,14 +114,13 @@ export default function Home() {
   }, []);
 
   /* ===============================
-     🎬 INTRO SCREEN UI
+     🎬 INTRO UI
   =============================== */
   if (intro) {
     return (
       <div className="intro">
         <h1 className="logo">OPTIMA</h1>
         <p className="tag">Precision • Style • Perfection</p>
-
         <div className="shine" />
 
         <style>{`
@@ -121,21 +131,16 @@ export default function Home() {
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            position: relative;
           }
 
           .logo {
             font-size: 60px;
-            letter-spacing: 6px;
             color: #C9A84C;
             animation: fadeScale 1.5s ease forwards;
           }
 
           .tag {
-            margin-top: 10px;
             color: #777;
-            letter-spacing: 2px;
             opacity: 0;
             animation: fadeIn 2s ease 1s forwards;
           }
@@ -150,8 +155,8 @@ export default function Home() {
           }
 
           @keyframes fadeScale {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
           }
 
           @keyframes fadeIn {
@@ -159,8 +164,8 @@ export default function Home() {
           }
 
           @keyframes shineMove {
-            0% { left: -100%; }
-            100% { left: 100%; }
+            from { left: -100%; }
+            to { left: 100%; }
           }
         `}</style>
       </div>
@@ -175,32 +180,6 @@ export default function Home() {
       <div className="center">
         <div className="pulse" />
         <p>Loading Optima Experience...</p>
-
-        <style>{`
-          .center {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-            color: #aaa;
-          }
-
-          .pulse {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #C9A84C;
-            animation: pulse 1.2s infinite;
-          }
-
-          @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0.5; }
-          }
-        `}</style>
       </div>
     );
   }
@@ -221,7 +200,10 @@ export default function Home() {
      🎯 MAIN SITE
   =============================== */
   return (
-    <div onClick={handleSecretTap}>
+    <div
+      onClick={handleSecretTap}
+      onTouchStart={handleSecretTap} // ✅ MOBILE FIX
+    >
       <CustomerSite services={services} gallery={gallery} />
     </div>
   );
