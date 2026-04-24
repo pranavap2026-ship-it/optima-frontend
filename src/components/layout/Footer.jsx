@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   FaInstagram,
   FaWhatsapp,
@@ -8,21 +7,28 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 
+import API from "../../api/api"; // ✅ IMPORTANT
+
 export default function Footer() {
   const [settings, setSettings] = useState({});
 
+  /* ===============================
+     📡 FETCH SETTINGS
+  =============================== */
   useEffect(() => {
-  const fetchSettings = async () => {
-    try {
-      const res = await API.get("/settings");
-      setSettings(res.data || res || {});
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const fetchSettings = async () => {
+      try {
+        const res = await API.get("/settings");
 
-  fetchSettings();
-}, []);
+        // wrapper already returns data
+        setSettings(res || {});
+      } catch (err) {
+        console.error("Footer error:", err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   const phone = settings.phone || "+919876543210";
   const email = settings.email || "optimatailors@email.com";
@@ -36,7 +42,10 @@ export default function Footer() {
       <div className="grid">
         {/* BRAND */}
         <div>
-          <h2 className="gold">{settings.shopName || "OPTIMA TAILORS"}</h2>
+          <h2 className="gold">
+            {settings.shopName || "OPTIMA TAILORS"}
+          </h2>
+
           <p className="muted">
             Precision tailoring with modern elegance.
           </p>
@@ -45,7 +54,7 @@ export default function Footer() {
             {settings.isOpen ? "🟢 Open Now" : "🔴 Closed"}
           </p>
 
-          {/* SOCIAL ICONS */}
+          {/* SOCIAL */}
           <div className="social">
             <FaInstagram />
             <FaWhatsapp />
@@ -84,13 +93,15 @@ export default function Footer() {
               WhatsApp
             </button>
 
-            <button onClick={() => (window.location.href = `tel:${phone}`)}>
+            <button
+              onClick={() => (window.location.href = `tel:${phone}`)}
+            >
               Call
             </button>
           </div>
         </div>
 
-        {/* INSTAGRAM FEED (STATIC PREVIEW) */}
+        {/* INSTAGRAM PREVIEW */}
         <div>
           <h4>Instagram</h4>
 
@@ -104,7 +115,8 @@ export default function Footer() {
 
       {/* COPYRIGHT */}
       <div className="bottom">
-        © {new Date().getFullYear()} {settings.shopName || "OPTIMA"} — All Rights Reserved
+        © {new Date().getFullYear()}{" "}
+        {settings.shopName || "OPTIMA"} — All Rights Reserved
       </div>
 
       {/* STYLES */}
@@ -132,20 +144,12 @@ export default function Footer() {
           gap: 30px;
         }
 
-        h4 {
-          color: #fff;
-          margin-bottom: 10px;
-        }
+        h4 { color: #fff; margin-bottom: 10px; }
 
-        .muted {
-          color: #777;
-        }
+        .muted { color: #777; }
 
-        .status {
-          margin-top: 10px;
-        }
+        .status { margin-top: 10px; }
 
-        /* SOCIAL */
         .social {
           display: flex;
           gap: 12px;
@@ -159,7 +163,6 @@ export default function Footer() {
           transform: scale(1.2);
         }
 
-        /* MAP */
         .map {
           width: 100%;
           height: 150px;
@@ -167,7 +170,6 @@ export default function Footer() {
           border-radius: 10px;
         }
 
-        /* INSTAGRAM */
         .insta-grid {
           display: grid;
           grid-template-columns: repeat(2,1fr);
@@ -185,7 +187,6 @@ export default function Footer() {
           background: #C9A84C;
         }
 
-        /* BUTTONS */
         .actions {
           margin-top: 10px;
           display: flex;
@@ -199,7 +200,6 @@ export default function Footer() {
           border: none;
           border-radius: 6px;
           cursor: pointer;
-          transition: 0.3s;
         }
 
         button:hover {
@@ -215,7 +215,6 @@ export default function Footer() {
           color: #666;
         }
 
-        /* MOBILE */
         @media (max-width: 768px) {
           .footer {
             padding: 50px 20px;
