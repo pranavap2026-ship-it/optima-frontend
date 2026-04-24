@@ -16,7 +16,7 @@ export default function Enquiries() {
   // ===============================
   // FETCH ENQUIRIES
   // ===============================
-import API from "../../api/api"; // adjust path
+
 
 const fetchEnquiries = async () => {
   try {
