@@ -12,7 +12,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   /* ===============================
-     🔐 FAST SECRET TAP (SECURE)
+     🔐 SECRET TAP (ADVANCED)
   =============================== */
   const tapCount = useRef(0);
   const lastTap = useRef(0);
@@ -20,26 +20,56 @@ export default function Home() {
   const handleSecretTap = (e) => {
     const now = Date.now();
 
-    // 🔥 Only bottom-right corner
-    if (e.clientX < window.innerWidth - 100) return;
-    if (e.clientY < window.innerHeight - 100) return;
+    // 🎯 VERY SMALL HIDDEN ZONE (bottom-right 50px)
+    if (e.clientX < window.innerWidth - 50) return;
+    if (e.clientY < window.innerHeight - 50) return;
 
     // ⏱ reset if slow
-    if (now - lastTap.current > 800) {
+    if (now - lastTap.current > 600) {
       tapCount.current = 0;
     }
 
     tapCount.current++;
     lastTap.current = now;
 
-    if (tapCount.current >= 5) {
-      navigate("/optima-secret-admin");
+    // 🔥 Require 7 taps (harder)
+    if (tapCount.current >= 7) {
+      openAdminAccess();
       tapCount.current = 0;
     }
   };
 
   /* ===============================
-     📡 FETCH DATA (PRODUCTION SAFE)
+     🔐 ADMIN ACCESS (PIN OPTIONAL)
+  =============================== */
+  const openAdminAccess = () => {
+    const pin = prompt("Enter Admin PIN");
+
+    // 👉 Change PIN here
+    if (pin === "1234") {
+      navigate("/optima-secret-admin");
+    } else {
+      alert("Access denied");
+    }
+  };
+
+  /* ===============================
+     ⌨️ SECRET KEY COMBO
+  =============================== */
+  useEffect(() => {
+    const handleKey = (e) => {
+      // Ctrl + Shift + A
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
+        openAdminAccess();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  /* ===============================
+     📡 FETCH DATA
   =============================== */
   const fetchData = async () => {
     try {
@@ -51,130 +81,51 @@ export default function Home() {
         API.get("/gallery"),
       ]);
 
-      // ✅ API already returns cleaned data
       setServices(servicesRes?.data || []);
       setGallery(galleryRes?.data || []);
 
     } catch (err) {
       console.error("Home API error:", err);
-
       setError("Failed to load content");
 
-      // 🔥 Optional auto retry
+      // retry
       setTimeout(fetchData, 2000);
-
     } finally {
       setLoading(false);
     }
   };
 
-  /* ===============================
-     🎯 EFFECTS
-  =============================== */
   useEffect(() => {
     fetchData();
-
-    // 💻 SECRET KEY (DESKTOP)
-    const handleKey = (e) => {
-      if (e.ctrlKey && e.key.toLowerCase() === "a") {
-        navigate("/optima-secret-admin");
-      }
-    };
-
-    window.addEventListener("keydown", handleKey);
-
-    return () => {
-      window.removeEventListener("keydown", handleKey);
-    };
   }, []);
 
   /* ===============================
-     ⏳ LOADING UI (PREMIUM)
+     ⏳ LOADING
   =============================== */
   if (loading) {
     return (
       <div className="center">
-        <div className="loader">
-          <div className="pulse" />
-          <p>Loading Optima Experience...</p>
-        </div>
-
-        <style>{`
-          .center {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-            color: #aaa;
-          }
-
-          .loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-          }
-
-          .pulse {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #C9A84C;
-            animation: pulse 1.2s infinite;
-          }
-
-          @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(0.8); opacity: 0.5; }
-          }
-        `}</style>
+        <div className="pulse" />
+        <p>WELCOME TO OPTIMA TAILORS...</p>
       </div>
     );
   }
 
   /* ===============================
-     ❌ ERROR UI
+     ❌ ERROR
   =============================== */
   if (error) {
     return (
       <div className="center">
         <h2 style={{ color: "red" }}>{error}</h2>
         <button onClick={fetchData}>Retry</button>
-
-        <style>{`
-          .center {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            background: #000;
-          }
-
-          button {
-            padding: 10px 20px;
-            background: #C9A84C;
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-          }
-        `}</style>
       </div>
     );
   }
 
-  /* ===============================
-     🎯 MAIN UI
-  =============================== */
   return (
     <div onClick={handleSecretTap}>
-      <CustomerSite
-        services={services}
-        gallery={gallery}
-      />
+      <CustomerSite services={services} gallery={gallery} />
     </div>
   );
 }
