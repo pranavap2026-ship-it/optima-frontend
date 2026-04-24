@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Spinner from "../../components/common/Spinner";
 import Button from "../../components/common/Button";
-
+import API from "../../api/api"; // adjust path
 export default function Gallery() {
   const [images, setImages] = useState([]);
   const [file, setFile] = useState(null);
@@ -20,26 +20,26 @@ export default function Gallery() {
   // ===============================
   // FETCH IMAGES
   // ===============================
-  const fetchImages = async () => {
-    try {
-      setPageLoading(true);
-      setError("");
+const fetchImages = async () => {
+  try {
+    setPageLoading(true);
+    setError("");
 
-      const res = await axios.get("http://localhost:5000/api/gallery");
-      setImages(res?.data || []);
+    const res = await API.get("/gallery");
 
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError("Failed to load gallery");
-    } finally {
-      setPageLoading(false);
-    }
-  };
+    // your wrapper already returns res.data
+    setImages(res.data || res || []);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    setError("Failed to load gallery");
+  } finally {
+    setPageLoading(false);
+  }
+};
 
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
+useEffect(() => {
+  fetchImages();
+}, []);
   // ===============================
   // HANDLE FILE
   // ===============================
@@ -52,63 +52,53 @@ export default function Gallery() {
   // ===============================
   // UPLOAD IMAGE
   // ===============================
-  const handleUpload = async () => {
-    console.log("BUTTON CLICKED"); // 🔥 DEBUG
+import API from "../../api/api"; // adjust path
 
-    if (!file) {
-      setError("Please select an image first");
-      return;
-    }
+const handleUpload = async () => {
+  console.log("BUTTON CLICKED");
 
-    const formData = new FormData();
-    formData.append("image", file);
+  if (!file) {
+    setError("Please select an image first");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      setError("");
+  const formData = new FormData();
+  formData.append("image", file);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/gallery",
-        formData,
-        {
-          headers: {
-            ...headers,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  try {
+    setLoading(true);
+    setError("");
 
-      console.log("UPLOAD SUCCESS:", res.data);
+    const res = await API.post("/gallery", formData);
 
-      setFile(null);
-      fetchImages();
+    console.log("UPLOAD SUCCESS:", res);
 
-    } catch (err) {
-      console.error("UPLOAD ERROR:", err.response || err);
-      setError("Upload failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setFile(null);
+    fetchImages();
+
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+    setError("Upload failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ===============================
   // DELETE IMAGE
   // ===============================
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this image?")) return;
+ const handleDelete = async (id) => {
+  if (!window.confirm("Delete this image?")) return;
 
-    try {
-      await axios.delete(
-        `http://localhost:5000/api/gallery/${id}`,
-        { headers }
-      );
+  try {
+    await API.delete(`/gallery/${id}`);
 
-      fetchImages();
-    } catch (err) {
-      console.error(err);
-      setError("Delete failed");
-    }
-  };
+    fetchImages(); // refresh list
+  } catch (err) {
+    console.error(err);
+    setError("Delete failed");
+  }
+};
 
   // ===============================
   // LOADING UI

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import axios from "axios";
-
+import API from "../../api/api";
 export default function Gallery() {
   const sectionRef = useRef(null);
   const cardsRef = useRef([]);
@@ -11,17 +11,19 @@ export default function Gallery() {
   /* ===============================
      FETCH FROM ADMIN BACKEND
   =============================== */
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/gallery")
-      .then((res) => {
-        console.log("Gallery Data:", res.data); // 🔥 DEBUG
-        setGallery(res.data || []);
-      })
-      .catch((err) => {
-        console.error("Gallery error:", err);
-      });
-  }, []);
+useEffect(() => {
+  const fetchGallery = async () => {
+    try {
+      const res = await API.get("/gallery");
+      console.log("Gallery Data:", res);
+      setGallery(res.data || res);
+    } catch (err) {
+      console.error("Gallery error:", err);
+    }
+  };
+
+  fetchGallery();
+}, []);
 
   /* ===============================
      GSAP ANIMATION

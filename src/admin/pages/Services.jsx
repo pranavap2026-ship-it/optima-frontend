@@ -4,7 +4,7 @@ import Spinner from "../../components/common/Spinner";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
-const API = "http://localhost:5000/api/services";
+import API from "../api/api"; // adjust path
 
 export default function Services() {
   const [services, setServices] = useState([]);

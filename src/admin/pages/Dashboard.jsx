@@ -37,71 +37,69 @@ export default function Dashboard() {
   /* ===============================
      FETCH DATA
   =============================== */
-  const fetchStats = async () => {
-    try {
-      setError("");
-      setRefreshing(true);
+import API from "../../api/api"; // adjust path
 
-      const [servicesRes, galleryRes, enquiriesRes, settingsRes] =
-        await Promise.all([
-          axios.get("http://localhost:5000/api/services/admin", { headers }),
-          axios.get("http://localhost:5000/api/gallery"),
-          axios.get("http://localhost:5000/api/enquiry", { headers }),
-          axios.get("http://localhost:5000/api/settings"),
-        ]);
+const fetchStats = async () => {
+  try {
+    setError("");
+    setRefreshing(true);
 
-      // 🔥 DEBUG (optional)
-      console.log("Services:", servicesRes.data);
-      console.log("Gallery:", galleryRes.data);
-      console.log("Enquiries:", enquiriesRes.data);
-      console.log("Settings:", settingsRes.data);
+    const [servicesRes, galleryRes, enquiriesRes, settingsRes] =
+      await Promise.all([
+        API.get("/services/admin", { headers }),
+        API.get("/gallery"),
+        API.get("/enquiry", { headers }),
+        API.get("/settings"),
+      ]);
 
-      setStats({
-        services: getCount(servicesRes),
-        gallery: getCount(galleryRes),
-        enquiries: getCount(enquiriesRes),
-        isOpen:
-          settingsRes?.data?.isOpen ??
-          settingsRes?.data?.data?.isOpen ??
-          true,
-      });
+    // 🔥 DEBUG
+    console.log("Services:", servicesRes);
+    console.log("Gallery:", galleryRes);
+    console.log("Enquiries:", enquiriesRes);
+    console.log("Settings:", settingsRes);
 
-    } catch (err) {
-      console.error("Dashboard Error:", err);
-      setError("Failed to load dashboard");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    setStats({
+      services: getCount(servicesRes),
+      gallery: getCount(galleryRes),
+      enquiries: getCount(enquiriesRes),
+      isOpen:
+        settingsRes?.isOpen ??
+        settingsRes?.data?.isOpen ??
+        true,
+    });
 
-  useEffect(() => {
-    fetchStats();
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+    setError("Failed to load dashboard");
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+};
 
-    // 🔥 AUTO REFRESH EVERY 30s
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(() => {
+  fetchStats();
 
+  const interval = setInterval(fetchStats, 30000);
+  return () => clearInterval(interval);
+}, []);
   /* ===============================
      TOGGLE SHOP STATUS
   =============================== */
-  const toggleShop = async () => {
-    try {
-      await axios.put(
-        "http://localhost:5000/api/settings",
-        { isOpen: !stats.isOpen },
-        { headers }
-      );
+ const toggleShop = async () => {
+  try {
+    await API.put("/settings", {
+      isOpen: !stats.isOpen,
+    });
 
-      setStats((prev) => ({
-        ...prev,
-        isOpen: !prev.isOpen,
-      }));
-    } catch (err) {
-      alert("Failed to update shop status");
-    }
-  };
+    setStats((prev) => ({
+      ...prev,
+      isOpen: !prev.isOpen,
+    }));
+  } catch (err) {
+    alert("Failed to update shop status");
+  }
+};
 
   /* ===============================
      LOADING

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import API from "../../api/api";
 export default function ShopInfo() {
   const [data, setData] = useState({
     isOpen: true,
@@ -16,16 +16,24 @@ export default function ShopInfo() {
   /* ===============================
      FETCH SETTINGS (FIXED)
   =============================== */
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/settings")
-      .then((res) => {
-        const settings = res.data?.data || res.data || {};
-        setData(settings);
-      })
-      .catch(() => setError("Failed to load shop info"))
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const res = await API.get("/settings");
+
+      // your backend usually returns { success, data }
+      const settings = res.data || res || {};
+
+      setData(settings);
+    } catch (err) {
+      setError("Failed to load shop info");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchSettings();
+}, []);
 
   const phone = data.phone || "+919876543210";
   const cleanPhone = phone.replace(/\D/g, "");

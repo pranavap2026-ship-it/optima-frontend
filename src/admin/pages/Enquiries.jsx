@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import API from "../../api/api"; // adjust path
 export default function Enquiries() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,84 +16,78 @@ export default function Enquiries() {
   // ===============================
   // FETCH ENQUIRIES
   // ===============================
-  const fetchEnquiries = async () => {
-    try {
-      setLoading(true);
-      setError("");
+import API from "../../api/api"; // adjust path
 
-      const res = await axios.get(
-        "http://localhost:5000/api/enquiry",
-        { headers }
-      );
+const fetchEnquiries = async () => {
+  try {
+    setLoading(true);
+    setError("");
 
-      setData(res?.data?.data || res?.data || []);
-    } catch (err) {
-      console.error("Enquiry fetch error:", err);
+    const res = await API.get("/enquiry", { headers });
 
-      if (err.response?.status === 401) {
-        alert("Session expired. Please login again.");
-        localStorage.removeItem("optima_token");
-        window.location.href = "/admin/login";
-      } else {
-        setError("Failed to load enquiries");
-      }
-    } finally {
-      setLoading(false);
+    // your wrapper already returns res.data
+    setData(res.data || res || []);
+  } catch (err) {
+    console.error("Enquiry fetch error:", err);
+
+    if (err.status === 401 || err.response?.status === 401) {
+      alert("Session expired. Please login again.");
+      localStorage.removeItem("optima_token");
+      window.location.href = "/admin/login";
+    } else {
+      setError("Failed to load enquiries");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
-  useEffect(() => {
-    fetchEnquiries();
-  }, []);
+useEffect(() => {
+  fetchEnquiries();
+}, []);
 
   // ===============================
   // MARK AS READ (OPTIMIZED)
   // ===============================
-  const markRead = async (id) => {
-    try {
-      setActionLoading(id);
+ 
+const markRead = async (id) => {
+  try {
+    setActionLoading(id);
 
-      await axios.put(
-        `http://localhost:5000/api/enquiry/${id}/read`,
-        {},
-        { headers }
-      );
+    await API.put(`/enquiry/${id}/read`, {});
 
-      // 🔥 OPTIMISTIC UPDATE
-      setData((prev) =>
-        prev.map((e) =>
-          e._id === id ? { ...e, read: true } : e
-        )
-      );
-    } catch (err) {
-      console.error("Mark read error:", err);
-    } finally {
-      setActionLoading(null);
-    }
-  };
+    // 🔥 OPTIMISTIC UPDATE
+    setData((prev) =>
+      prev.map((e) =>
+        e._id === id ? { ...e, read: true } : e
+      )
+    );
+  } catch (err) {
+    console.error("Mark read error:", err);
+  } finally {
+    setActionLoading(null);
+  }
+};
 
   // ===============================
   // DELETE (OPTIMIZED)
   // ===============================
-  const deleteEnquiry = async (id) => {
-    if (!window.confirm("Delete this enquiry?")) return;
+ const deleteEnquiry = async (id) => {
+  if (!window.confirm("Delete this enquiry?")) return;
 
-    try {
-      setActionLoading(id);
+  try {
+    setActionLoading(id);
 
-      await axios.delete(
-        `http://localhost:5000/api/enquiry/${id}`,
-        { headers }
-      );
+    await API.delete(`/enquiry/${id}`);
 
-      // 🔥 REMOVE WITHOUT REFETCH
-      setData((prev) => prev.filter((e) => e._id !== id));
-    } catch (err) {
-      console.error("Delete error:", err);
-    } finally {
-      setActionLoading(null);
-    }
-  };
+    // 🔥 REMOVE WITHOUT REFETCH
+    setData((prev) => prev.filter((e) => e._id !== id));
+  } catch (err) {
+    console.error("Delete error:", err);
+  } finally {
+    setActionLoading(null);
+  }
+};
 
   // ===============================
   // LOADING UI

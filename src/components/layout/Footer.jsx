@@ -12,11 +12,17 @@ export default function Footer() {
   const [settings, setSettings] = useState({});
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/settings")
-      .then((res) => setSettings(res?.data?.data || res.data || {}))
-      .catch(console.error);
-  }, []);
+  const fetchSettings = async () => {
+    try {
+      const res = await API.get("/settings");
+      setSettings(res.data || res || {});
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchSettings();
+}, []);
 
   const phone = settings.phone || "+919876543210";
   const email = settings.email || "optimatailors@email.com";

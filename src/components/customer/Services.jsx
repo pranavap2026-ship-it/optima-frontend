@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import axios from "axios";
-
+import API from "../../api/api";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Services() {
@@ -18,15 +18,20 @@ export default function Services() {
   /* ===============================
      FETCH SERVICES
   =============================== */
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/services")
-      .then((res) => {
-        setServices(res.data?.data || []);
-      })
-      .catch(() => setError("Failed to load services"))
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  const fetchServices = async () => {
+    try {
+      const res = await API.get("/services");
+      setServices(res.data || []);
+    } catch (err) {
+      setError("Failed to load services");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchServices();
+}, []);
 
   /* ===============================
      RESET REFS

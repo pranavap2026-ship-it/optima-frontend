@@ -21,32 +21,31 @@ export default function Login() {
   };
 
   // 🔥 LOGIN FUNCTION
-  const handleLogin = async () => {
-    if (!form.email || !form.password) {
-      return setError("Enter email & password");
-    }
+import API from "../../api/api"; // adjust path
 
-    try {
-      setLoading(true);
-      setError("");
+const handleLogin = async () => {
+  if (!form.email || !form.password) {
+    return setError("Enter email & password");
+  }
 
-      const res = await axios.post(
-        "http://localhost:5000/api/admin/login",
-        form
-      );
+  try {
+    setLoading(true);
+    setError("");
 
-      // 🔐 SAVE TOKEN
-      localStorage.setItem("token", res.data.token);
+    const res = await API.post("/admin/login", form);
 
-      // 🚀 REDIRECT
-      navigate("/admin");
+    // 🔐 SAVE TOKEN (match your interceptor key!)
+    localStorage.setItem("optima_token", res.token);
 
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // 🚀 REDIRECT
+    navigate("/admin");
+
+  } catch (err) {
+    setError(err.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 🔥 ENTER KEY SUPPORT
   const handleKey = (e) => {

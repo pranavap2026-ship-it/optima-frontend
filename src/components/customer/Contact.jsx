@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Input from "../common/Input";
 import Button from "../common/Button";
+import API from "../../api/api";
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -21,16 +22,24 @@ export default function Contact() {
   /* ===============================
      FETCH SETTINGS (FIXED)
   =============================== */
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/settings")
-      .then((res) => {
-        const data = res.data?.data || res.data || {};
-        setSettings(data);
-      })
-      .catch(console.error)
-      .finally(() => setSettingsLoading(false));
-  }, []);
+ useEffect(() => {
+  const fetchSettings = async () => {
+    try {
+      const res = await API.get("/settings");
+
+      // backend format: { success, data }
+      const data = res.data || res || {};
+
+      setSettings(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  fetchSettings();
+}, []);
 
   /* ===============================
      FORM HANDLING
@@ -55,34 +64,36 @@ export default function Contact() {
     return null;
   };
 
-  const handleSubmit = async () => {
-    const errMsg = validate();
-    if (errMsg) {
-      setError(errMsg);
-      return;
-    }
 
-    try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
 
-      await axios.post("http://localhost:5000/api/enquiry", form);
+const handleSubmit = async () => {
+  const errMsg = validate();
+  if (errMsg) {
+    setError(errMsg);
+    return;
+  }
 
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        message: "",
-      });
+  try {
+    setLoading(true);
+    setError("");
+    setSuccess("");
 
-      setSuccess("✅ Message sent successfully!");
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to send message");
-    } finally {
-      setLoading(false);
-    }
-  };
+    await API.post("/enquiry", form);
+
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      message: "",
+    });
+
+    setSuccess("✅ Message sent successfully!");
+  } catch (err) {
+    setError(err.message || "Failed to send message");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ===============================
      DYNAMIC DATA
