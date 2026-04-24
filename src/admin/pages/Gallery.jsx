@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import API from "../../api/api";
 import Spinner from "../../components/common/Spinner";
 import Button from "../../components/common/Button";
-import API from "../../api/api";
+
 
 export default function Gallery() {
   const [images, setImages] = useState([]);

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../api/api"; // adjust path if needed
+import API from "../../api/api"; // adjust path if needed
 
 export default function Enquiries() {
   const [data, setData] = useState([]);

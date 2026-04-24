@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import API from "../../api/api"; // adjust path
+import API from "../../api/api";
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -15,93 +15,73 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-const token = localStorage.getItem("optima_token");
-
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
 
   /* ===============================
-     🔥 SAFE COUNT HELPER
+     🔢 COUNT HELPER
   =============================== */
   const getCount = (res) => {
-    return (
-      res?.data?.total ??
-      res?.data?.data?.length ??
-      res?.data?.length ??
-      0
-    );
+    return res?.length ?? res?.data?.length ?? 0;
   };
 
   /* ===============================
-     FETCH DATA
+     📡 FETCH DATA
   =============================== */
+  const fetchStats = async () => {
+    try {
+      setError("");
+      setRefreshing(true);
 
+      const [servicesRes, galleryRes, enquiriesRes, settingsRes] =
+        await Promise.all([
+          API.get("/services/admin"),
+          API.get("/gallery"),
+          API.get("/enquiry"),
+          API.get("/settings"),
+        ]);
 
-const fetchStats = async () => {
-  try {
-    setError("");
-    setRefreshing(true);
+      setStats({
+        services: getCount(servicesRes),
+        gallery: getCount(galleryRes),
+        enquiries: getCount(enquiriesRes),
+        isOpen: settingsRes?.isOpen ?? true,
+      });
 
-    const [servicesRes, galleryRes, enquiriesRes, settingsRes] =
-      await Promise.all([
-        API.get("/services/admin", { headers }),
-        API.get("/gallery"),
-        API.get("/enquiry", { headers }),
-        API.get("/settings"),
-      ]);
+    } catch (err) {
+      console.error("Dashboard Error:", err);
+      setError("Failed to load dashboard");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-    // 🔥 DEBUG
-    console.log("Services:", servicesRes);
-    console.log("Gallery:", galleryRes);
-    console.log("Enquiries:", enquiriesRes);
-    console.log("Settings:", settingsRes);
+  useEffect(() => {
+    fetchStats();
 
-    setStats({
-      services: getCount(servicesRes),
-      gallery: getCount(galleryRes),
-      enquiries: getCount(enquiriesRes),
-      isOpen:
-        settingsRes?.isOpen ??
-        settingsRes?.data?.isOpen ??
-        true,
-    });
-
-  } catch (err) {
-    console.error("Dashboard Error:", err);
-    setError("Failed to load dashboard");
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
-};
-
-useEffect(() => {
-  fetchStats();
-
-  const interval = setInterval(fetchStats, 30000);
-  return () => clearInterval(interval);
-}, []);
-  /* ===============================
-     TOGGLE SHOP STATUS
-  =============================== */
- const toggleShop = async () => {
-  try {
-    await API.put("/settings", {
-      isOpen: !stats.isOpen,
-    });
-
-    setStats((prev) => ({
-      ...prev,
-      isOpen: !prev.isOpen,
-    }));
-  } catch (err) {
-    alert("Failed to update shop status");
-  }
-};
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   /* ===============================
-     LOADING
+     🔁 TOGGLE SHOP STATUS
+  =============================== */
+  const toggleShop = async () => {
+    try {
+      await API.put("/settings", {
+        isOpen: !stats.isOpen,
+      });
+
+      setStats((prev) => ({
+        ...prev,
+        isOpen: !prev.isOpen,
+      }));
+    } catch (err) {
+      alert("Failed to update shop status");
+    }
+  };
+
+  /* ===============================
+     ⏳ LOADING
   =============================== */
   if (loading) {
     return (
@@ -112,7 +92,7 @@ useEffect(() => {
   }
 
   /* ===============================
-     ERROR
+     ❌ ERROR
   =============================== */
   if (error) {
     return (
@@ -136,7 +116,7 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* QUICK ACTIONS */}
+      {/* ACTIONS */}
       <div className="actions">
         <button onClick={() => navigate("/admin/services")}>
           ➕ Add Service
@@ -179,11 +159,8 @@ useEffect(() => {
         </p>
       </div>
 
-      {/* STYLES */}
       <style>{`
-        .dash {
-          padding: 20px;
-        }
+        .dash { padding: 20px; }
 
         .header {
           display: flex;
@@ -192,9 +169,7 @@ useEffect(() => {
           margin-bottom: 30px;
         }
 
-        .header p {
-          color: #777;
-        }
+        .header p { color: #777; }
 
         .refresh {
           padding: 8px 14px;
@@ -218,7 +193,6 @@ useEffect(() => {
           border: none;
           cursor: pointer;
           border-radius: 8px;
-          font-weight: 500;
         }
 
         .grid {
@@ -233,12 +207,6 @@ useEffect(() => {
           border-radius: 16px;
           text-align: center;
           border: 1px solid #222;
-          transition: 0.3s;
-        }
-
-        .card:hover {
-          transform: translateY(-5px);
-          border-color: #C9A84C;
         }
 
         .toggle {
@@ -255,21 +223,13 @@ useEffect(() => {
           margin-top: 30px;
           text-align: left;
         }
-
-        @media (max-width: 768px) {
-          .header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-          }
-        }
       `}</style>
     </div>
   );
 }
 
 /* ===============================
-   CARD COMPONENT
+   CARD
 =============================== */
 function Card({ title, value }) {
   return (

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import API from "../../api/api";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
-import API from "../../api/api"; // ✅ MUST be at top
+ // ✅ MUST be at top
 
 export default function Login() {
   const [form, setForm] = useState({
