@@ -52,7 +52,7 @@ useEffect(() => {
   // ===============================
   // UPLOAD IMAGE
   // ===============================
-import API from "../../api/api"; // adjust path
+
 
 const handleUpload = async () => {
   console.log("BUTTON CLICKED");

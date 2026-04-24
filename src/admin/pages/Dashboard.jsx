@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import API from "../../api/api"; // adjust path
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ export default function Dashboard() {
   /* ===============================
      FETCH DATA
   =============================== */
-import API from "../../api/api"; // adjust path
+
 
 const fetchStats = async () => {
   try {
