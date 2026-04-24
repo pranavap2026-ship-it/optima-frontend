@@ -4,6 +4,7 @@ import axios from "axios";
 // 🌐 BASE URL (ENV SUPPORT)
 // ===============================
 const BASE_URL = import.meta.env.VITE_API_URL;
+console.log("ENV:", import.meta.env.VITE_API_URL);
 // ===============================
 // 🔥 AXIOS INSTANCE
 // ===============================
