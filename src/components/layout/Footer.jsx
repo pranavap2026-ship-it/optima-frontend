@@ -62,7 +62,7 @@ export default function Footer() {
       {/* STYLES */}
       <style>{`
         .footer {
-          padding: 50px 20px;
+          padding: 60px 20px 30px;
           text-align: center;
           background: #000;
           color: #aaa;
@@ -72,21 +72,30 @@ export default function Footer() {
           color: #C9A84C;
           letter-spacing: 3px;
           margin-bottom: 10px;
+          font-size: 26px;
         }
 
         .tag {
           color: #777;
           font-size: 14px;
-          margin-bottom: 20px;
+          margin-bottom: 25px;
+          max-width: 400px;
+          margin-left: auto;
+          margin-right: auto;
+          line-height: 1.5;
         }
 
         .social {
           display: flex;
           justify-content: center;
-          gap: 20px;
-          font-size: 22px;
-          margin-bottom: 20px;
+          gap: 25px;
+          font-size: 24px;
+          margin-bottom: 25px;
+        }
+
+        .social svg {
           cursor: pointer;
+          transition: 0.3s;
         }
 
         .social svg:hover {
@@ -97,6 +106,43 @@ export default function Footer() {
         .copy {
           font-size: 12px;
           color: #555;
+        }
+
+        /* 🔥 MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+          .logo {
+            font-size: 22px;
+          }
+
+          .tag {
+            font-size: 13px;
+            padding: 0 10px;
+          }
+
+          .social {
+            font-size: 22px;
+            gap: 20px;
+          }
+
+          .footer {
+            padding: 50px 15px 25px;
+          }
+        }
+
+        /* 🔥 SMALL MOBILE */
+        @media (max-width: 480px) {
+          .logo {
+            font-size: 20px;
+          }
+
+          .tag {
+            font-size: 12px;
+          }
+
+          .social {
+            font-size: 20px;
+            gap: 18px;
+          }
         }
       `}</style>
     </footer>
