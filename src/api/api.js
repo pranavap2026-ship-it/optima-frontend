@@ -1,10 +1,17 @@
 import axios from "axios";
 
 // ===============================
-// 🌐 BASE URL (ENV SUPPORT)
+// 🌐 BASE URL (STRICT ENV)
 // ===============================
 const BASE_URL = import.meta.env.VITE_API_URL;
-console.log("ENV:", import.meta.env.VITE_API_URL);
+
+// 🚨 HARD FAIL if ENV missing (prevents silent bugs)
+if (!BASE_URL) {
+  console.error("❌ VITE_API_URL is NOT set!");
+} else {
+  console.log("✅ API URL:", BASE_URL);
+}
+
 // ===============================
 // 🔥 AXIOS INSTANCE
 // ===============================
@@ -24,7 +31,7 @@ API.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // ✅ FIX: Don't override FormData (for image upload)
+    // ✅ Don't override FormData (for image upload)
     if (!(config.data instanceof FormData)) {
       config.headers["Content-Type"] = "application/json";
     }
@@ -42,9 +49,9 @@ API.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
-    console.error("API ERROR:", error.response || error.message);
+    console.error("🔥 API ERROR:", error.response || error.message);
 
-    // 🔥 HANDLE AUTH ERROR
+    // 🔐 AUTH ERROR
     if (status === 401) {
       localStorage.removeItem("optima_token");
 
@@ -53,9 +60,14 @@ API.interceptors.response.use(
       }
     }
 
-    // 🔥 HANDLE SERVER ERROR
+    // ⚠️ SERVER ERROR
     if (status === 500) {
       alert("Server error. Please try again later.");
+    }
+
+    // 🌐 NETWORK ERROR (important for your case)
+    if (!error.response) {
+      console.error("❌ Network error - check backend or CORS");
     }
 
     return Promise.reject(error);
@@ -65,12 +77,14 @@ API.interceptors.response.use(
 // ===============================
 // 📦 CLEAN RESPONSE HANDLER
 // ===============================
-const handleResponse = (promise) =>
-  promise
-    .then((res) => res.data)
-    .catch((err) => {
-      throw err.response?.data || err;
-    });
+const handleResponse = async (promise) => {
+  try {
+    const res = await promise;
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || err;
+  }
+};
 
 // ===============================
 // 📦 API METHODS
