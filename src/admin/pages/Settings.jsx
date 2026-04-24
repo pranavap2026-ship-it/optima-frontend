@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import API from "../../api/api"; // ✅ use global API
+import API from "../../api/api";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
@@ -24,23 +24,22 @@ export default function Settings() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const token = localStorage.getItem("token");
-
   /* ===============================
-     FETCH SETTINGS
+     📡 FETCH SETTINGS
   =============================== */
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await API.get("/settings");
-        const data = res?.data?.data ?? res?.data ?? {};
+
+        // API wrapper already returns data
+        const data = res || {};
 
         setForm((prev) => ({
           ...prev,
           ...data,
           stats: data.stats || [],
         }));
-
       } catch {
         setMessage("❌ Failed to load settings");
       } finally {
@@ -56,7 +55,7 @@ export default function Settings() {
   };
 
   /* ===============================
-     STATS
+     📊 STATS
   =============================== */
   const updateStat = (index, key, value) => {
     const updated = [...form.stats];
@@ -79,7 +78,7 @@ export default function Settings() {
   };
 
   /* ===============================
-     IMAGE UPLOAD
+     🖼 IMAGE UPLOAD
   =============================== */
   const handleImageUpload = async (file) => {
     if (!file) return;
@@ -93,9 +92,8 @@ export default function Settings() {
 
       const res = await API.post("/upload", formData);
 
-      setField("aboutImage", res.data.url);
+      setField("aboutImage", res.url);
       setMessage("✅ Image uploaded");
-
     } catch {
       setMessage("❌ Upload failed");
     } finally {
@@ -104,7 +102,7 @@ export default function Settings() {
   };
 
   /* ===============================
-     SAVE
+     💾 SAVE SETTINGS
   =============================== */
   const handleSave = async () => {
     try {
@@ -115,12 +113,9 @@ export default function Settings() {
       setLoading(true);
       setMessage("");
 
-      await API.put("/settings", form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await API.put("/settings", form);
 
       setMessage("✅ Saved successfully");
-
     } catch {
       setMessage("❌ Save failed");
     } finally {
@@ -182,8 +177,12 @@ export default function Settings() {
             }
           />
 
-          <input type="file"
-            onChange={(e) => handleImageUpload(e.target.files[0])} />
+          <input
+            type="file"
+            onChange={(e) =>
+              handleImageUpload(e.target.files[0])
+            }
+          />
 
           {uploading && <p>Uploading...</p>}
 
@@ -218,11 +217,8 @@ export default function Settings() {
         disabled={loading || uploading}
       />
 
-      {/* STYLES */}
       <style>{`
-        .container {
-          padding: 20px;
-        }
+        .container { padding: 20px; }
 
         .grid {
           display: grid;
@@ -231,9 +227,7 @@ export default function Settings() {
           margin-top: 20px;
         }
 
-        .msg {
-          color: #C9A84C;
-        }
+        .msg { color: #C9A84C; }
 
         .textarea {
           width: 100%;
@@ -258,7 +252,7 @@ export default function Settings() {
 }
 
 /* ===============================
-   🔥 REUSABLE CARD
+   🔥 CARD COMPONENT
 =============================== */
 function Card({ title, children }) {
   return (

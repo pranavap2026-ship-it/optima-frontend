@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Spinner from "../../components/common/Spinner";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
-import API from "../../api/api"; // adjust path
+import API from "../api/api"; // adjust path
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -16,23 +15,17 @@ export default function Services() {
   });
 
   const [image, setImage] = useState(null);
-  const [editId, setEditId] = useState(null); // 🔥 edit mode
+  const [editId, setEditId] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
-
-  const authHeader = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
-
   /* ================= FETCH ================= */
   const fetchServices = async () => {
     try {
-      const res = await axios.get(`${API}/admin`, authHeader);
-      setServices(res.data?.data || []);
+      const res = await API.get("/services/admin");
+      setServices(res.data || res || []);
     } catch {
       setError("Failed to load services");
     } finally {
@@ -63,37 +56,26 @@ export default function Services() {
       let res;
 
       if (editId) {
-        // 🔥 UPDATE
-        res = await axios.put(`${API}/${editId}`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        // UPDATE
+        res = await API.put(`/services/${editId}`, formData);
 
         setServices((prev) =>
-          prev.map((s) => (s._id === editId ? res.data.data : s))
+          prev.map((s) => (s._id === editId ? res.data : s))
         );
-
       } else {
-        // 🔥 CREATE
-        res = await axios.post(API, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        // CREATE
+        res = await API.post("/services", formData);
 
-        setServices((prev) => [res.data.data, ...prev]);
+        setServices((prev) => [res.data, ...prev]);
       }
 
-      // 🔥 RESET
+      // RESET
       setForm({ name: "", price: "", description: "" });
       setImage(null);
       setEditId(null);
 
     } catch (err) {
-      setError(err.response?.data?.error || "Failed");
+      setError(err.message || "Failed");
     } finally {
       setLoading(false);
     }
@@ -115,18 +97,25 @@ export default function Services() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this service?")) return;
 
-    await axios.delete(`${API}/${id}`, authHeader);
-
-    setServices((prev) => prev.filter((s) => s._id !== id));
+    try {
+      await API.delete(`/services/${id}`);
+      setServices((prev) => prev.filter((s) => s._id !== id));
+    } catch (err) {
+      console.error(err);
+      setError("Delete failed");
+    }
   };
 
   /* ================= TOGGLE ================= */
   const handleToggle = async (id) => {
-    const res = await axios.patch(`${API}/${id}/toggle`, {}, authHeader);
-
-    setServices((prev) =>
-      prev.map((s) => (s._id === id ? res.data.data : s))
-    );
+    try {
+      const res = await API.patch(`/services/${id}/toggle`);
+      setServices((prev) =>
+        prev.map((s) => (s._id === id ? res.data : s))
+      );
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -135,7 +124,7 @@ export default function Services() {
 
       {error && <p className="error">{error}</p>}
 
-      {/* ================= FORM ================= */}
+      {/* FORM */}
       <div className="card form-card">
         <h3>{editId ? "Edit Service" : "Add Service"}</h3>
 
@@ -152,7 +141,6 @@ export default function Services() {
           onChange={(v) => setForm({ ...form, price: v })}
         />
 
-        {/* 🔥 FIXED TEXTAREA CLICK */}
         <textarea
           value={form.description}
           placeholder="Description"
@@ -177,7 +165,7 @@ export default function Services() {
         />
       </div>
 
-      {/* ================= LIST ================= */}
+      {/* LIST */}
       {fetching ? (
         <Spinner />
       ) : (
@@ -190,19 +178,21 @@ export default function Services() {
             <p className="desc">{s.description}</p>
 
             <div className="actions">
-              <button type="button" onClick={() => handleEdit(s)}>Edit</button>
-              <button type="button" onClick={() => handleToggle(s._id)}>
-  {s.active ? "Hide" : "Show"}
-</button>
-              <button type="button" onClick={() => handleDelete(s._id)}>
-  Delete
-</button>
+              <button onClick={() => handleEdit(s)}>Edit</button>
+
+              <button onClick={() => handleToggle(s._id)}>
+                {s.active ? "Hide" : "Show"}
+              </button>
+
+              <button onClick={() => handleDelete(s._id)}>
+                Delete
+              </button>
             </div>
           </div>
         ))
       )}
 
-      {/* ================= STYLES ================= */}
+      {/* STYLES */}
       <style>{`
         .container { position: relative; z-index: 10; }
 
@@ -214,10 +204,6 @@ export default function Services() {
           margin-bottom: 20px;
         }
 
-        .form-card * {
-          pointer-events: auto; /* 🔥 FIX CLICK */
-        }
-
         input, textarea {
           width: 100%;
           padding: 10px;
@@ -226,14 +212,9 @@ export default function Services() {
           color: #fff;
           border: 1px solid #222;
           border-radius: 6px;
-          z-index: 100;
-          position: relative;
         }
 
-        textarea {
-          min-height: 100px;
-          resize: vertical;
-        }
+        textarea { min-height: 100px; }
 
         .actions {
           display: flex;
@@ -247,33 +228,8 @@ export default function Services() {
           object-fit: cover;
           border-radius: 10px;
         }
-        
 
-        .actions button {
-  pointer-events: auto;
-  position: relative;
-  z-index: 50;
-  cursor: pointer;
-}
-
-
-.card {
-  position: relative;
-  z-index: 10;
-}
-
-.container {
-  position: relative;
-  z-index: 10;
-}
-
-.overlay {
-  pointer-events: none;
-}
-        .preview {
-          width: 100px;
-          margin-top: 10px;
-        }
+        .preview { width: 100px; margin-top: 10px; }
 
         .price { color: #C9A84C; }
         .desc { color: #777; }

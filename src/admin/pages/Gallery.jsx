@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Spinner from "../../components/common/Spinner";
 import Button from "../../components/common/Button";
-import API from "../../api/api"; // adjust path
+import API from "../../api/api";
+
 export default function Gallery() {
   const [images, setImages] = useState([]);
   const [file, setFile] = useState(null);
@@ -10,98 +10,83 @@ export default function Gallery() {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔐 TOKEN FIX
-  const token = localStorage.getItem("token");
+  // ===============================
+  // 📡 FETCH IMAGES
+  // ===============================
+  const fetchImages = async () => {
+    try {
+      setPageLoading(true);
+      setError("");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
+      const res = await API.get("/gallery");
+
+      // wrapper already returns data
+      setImages(res || []);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to load gallery");
+    } finally {
+      setPageLoading(false);
+    }
   };
 
-  // ===============================
-  // FETCH IMAGES
-  // ===============================
-const fetchImages = async () => {
-  try {
-    setPageLoading(true);
-    setError("");
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
-    const res = await API.get("/gallery");
-
-    // your wrapper already returns res.data
-    setImages(res.data || res || []);
-  } catch (err) {
-    console.error("Fetch error:", err);
-    setError("Failed to load gallery");
-  } finally {
-    setPageLoading(false);
-  }
-};
-
-useEffect(() => {
-  fetchImages();
-}, []);
   // ===============================
-  // HANDLE FILE
+  // 📁 HANDLE FILE
   // ===============================
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
-    console.log("FILE:", selected); // 🔥 DEBUG
     setFile(selected);
   };
 
   // ===============================
-  // UPLOAD IMAGE
+  // ⬆️ UPLOAD IMAGE
   // ===============================
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select an image first");
+      return;
+    }
 
+    const formData = new FormData();
+    formData.append("image", file);
 
-const handleUpload = async () => {
-  console.log("BUTTON CLICKED");
+    try {
+      setLoading(true);
+      setError("");
 
-  if (!file) {
-    setError("Please select an image first");
-    return;
-  }
+      await API.post("/gallery", formData);
 
-  const formData = new FormData();
-  formData.append("image", file);
-
-  try {
-    setLoading(true);
-    setError("");
-
-    const res = await API.post("/gallery", formData);
-
-    console.log("UPLOAD SUCCESS:", res);
-
-    setFile(null);
-    fetchImages();
-
-  } catch (err) {
-    console.error("UPLOAD ERROR:", err);
-    setError("Upload failed");
-  } finally {
-    setLoading(false);
-  }
-};
+      setFile(null);
+      fetchImages();
+    } catch (err) {
+      console.error("Upload error:", err);
+      setError("Upload failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ===============================
-  // DELETE IMAGE
+  // 🗑 DELETE IMAGE
   // ===============================
- const handleDelete = async (id) => {
-  if (!window.confirm("Delete this image?")) return;
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this image?")) return;
 
-  try {
-    await API.delete(`/gallery/${id}`);
-
-    fetchImages(); // refresh list
-  } catch (err) {
-    console.error(err);
-    setError("Delete failed");
-  }
-};
+    try {
+      await API.delete(`/gallery/${id}`);
+      setImages((prev) => prev.filter((img) => img._id !== id));
+    } catch (err) {
+      console.error(err);
+      setError("Delete failed");
+    }
+  };
 
   // ===============================
-  // LOADING UI
+  // ⏳ LOADING UI
   // ===============================
   if (pageLoading) {
     return (
@@ -112,41 +97,16 @@ const handleUpload = async () => {
   }
 
   return (
-    <div
-      style={{
-        position: "relative",
-        zIndex: 10, // 🔥 FIX OVERLAY ISSUE
-      }}
-    >
+    <div style={{ position: "relative", zIndex: 10 }}>
       <h2 style={{ marginBottom: 20 }}>Gallery Management</h2>
 
-      {/* ❌ ERROR */}
       {error && (
         <p style={{ color: "red", marginBottom: 10 }}>{error}</p>
       )}
 
-      {/* ================= UPLOAD ================= */}
-      <div
-        className="card"
-        style={{
-          marginBottom: 30,
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          position: "relative",
-          zIndex: 999, // 🔥 FORCE ABOVE EVERYTHING
-        }}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          style={{
-            pointerEvents: "auto",
-            position: "relative",
-            zIndex: 999,
-          }}
-        />
+      {/* UPLOAD */}
+      <div className="card" style={{ marginBottom: 30 }}>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
 
         {file && (
           <p style={{ color: "#aaa", fontSize: 12 }}>
@@ -154,14 +114,13 @@ const handleUpload = async () => {
           </p>
         )}
 
-        {/* 🔥 BUTTON FIX */}
         <Button
           label={loading ? "Uploading..." : "Upload Image"}
           onClick={handleUpload}
         />
       </div>
 
-      {/* ================= GRID ================= */}
+      {/* GRID */}
       {images.length === 0 ? (
         <p style={{ color: "#777" }}>No images uploaded</p>
       ) : (
@@ -173,14 +132,7 @@ const handleUpload = async () => {
           }}
         >
           {images.map((img) => (
-            <div
-              key={img._id}
-              className="card"
-              style={{
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
+            <div key={img._id} className="card" style={{ position: "relative" }}>
               <img
                 src={img.url}
                 alt=""

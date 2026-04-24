@@ -1,96 +1,87 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import API from "../../api/api"; // adjust path
+import API from "../api/api"; // adjust path if needed
+
 export default function Enquiries() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("optima_token");
+  // ===============================
+  // 📡 FETCH ENQUIRIES
+  // ===============================
+  const fetchEnquiries = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
+      const res = await API.get("/enquiry");
+
+      // API wrapper already returns res.data
+      setData(res || []);
+    } catch (err) {
+      console.error("Enquiry fetch error:", err);
+
+      if (err.status === 401 || err.response?.status === 401) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("optima_token");
+        window.location.href = "/admin/login";
+      } else {
+        setError("Failed to load enquiries");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEnquiries();
+  }, []);
+
+  // ===============================
+  // ✅ MARK AS READ
+  // ===============================
+  const markRead = async (id) => {
+    try {
+      setActionLoading(id);
+
+      await API.put(`/enquiry/${id}/read`);
+
+      // Optimistic update
+      setData((prev) =>
+        prev.map((e) =>
+          e._id === id ? { ...e, read: true } : e
+        )
+      );
+    } catch (err) {
+      console.error("Mark read error:", err);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // ===============================
-  // FETCH ENQUIRIES
+  // 🗑 DELETE ENQUIRY
   // ===============================
+  const deleteEnquiry = async (id) => {
+    if (!window.confirm("Delete this enquiry?")) return;
 
+    try {
+      setActionLoading(id);
 
-const fetchEnquiries = async () => {
-  try {
-    setLoading(true);
-    setError("");
+      await API.delete(`/enquiry/${id}`);
 
-    const res = await API.get("/enquiry", { headers });
-
-    // your wrapper already returns res.data
-    setData(res.data || res || []);
-  } catch (err) {
-    console.error("Enquiry fetch error:", err);
-
-    if (err.status === 401 || err.response?.status === 401) {
-      alert("Session expired. Please login again.");
-      localStorage.removeItem("optima_token");
-      window.location.href = "/admin/login";
-    } else {
-      setError("Failed to load enquiries");
+      // Remove locally (no refetch needed)
+      setData((prev) => prev.filter((e) => e._id !== id));
+    } catch (err) {
+      console.error("Delete error:", err);
+    } finally {
+      setActionLoading(null);
     }
-  } finally {
-    setLoading(false);
-  }
-};
-
-useEffect(() => {
-  fetchEnquiries();
-}, []);
+  };
 
   // ===============================
-  // MARK AS READ (OPTIMIZED)
-  // ===============================
- 
-const markRead = async (id) => {
-  try {
-    setActionLoading(id);
-
-    await API.put(`/enquiry/${id}/read`, {});
-
-    // 🔥 OPTIMISTIC UPDATE
-    setData((prev) =>
-      prev.map((e) =>
-        e._id === id ? { ...e, read: true } : e
-      )
-    );
-  } catch (err) {
-    console.error("Mark read error:", err);
-  } finally {
-    setActionLoading(null);
-  }
-};
-
-  // ===============================
-  // DELETE (OPTIMIZED)
-  // ===============================
- const deleteEnquiry = async (id) => {
-  if (!window.confirm("Delete this enquiry?")) return;
-
-  try {
-    setActionLoading(id);
-
-    await API.delete(`/enquiry/${id}`);
-
-    // 🔥 REMOVE WITHOUT REFETCH
-    setData((prev) => prev.filter((e) => e._id !== id));
-  } catch (err) {
-    console.error("Delete error:", err);
-  } finally {
-    setActionLoading(null);
-  }
-};
-
-  // ===============================
-  // LOADING UI
+  // ⏳ LOADING UI
   // ===============================
   if (loading) {
     return (
@@ -104,17 +95,17 @@ const markRead = async (id) => {
     <div>
       <h2 style={{ marginBottom: 20 }}>Customer Enquiries</h2>
 
-      {/* ERROR */}
+      {/* ❌ ERROR */}
       {error && (
         <p style={{ color: "#ff4d4d" }}>{error}</p>
       )}
 
-      {/* EMPTY */}
+      {/* 📭 EMPTY */}
       {data.length === 0 && (
         <p style={{ color: "#777" }}>No enquiries yet</p>
       )}
 
-      {/* LIST */}
+      {/* 📦 LIST */}
       <div style={{ display: "grid", gap: 20 }}>
         {data.map((e) => {
           const phone = e.phone?.replace(/\D/g, "") || "";

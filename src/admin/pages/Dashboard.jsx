@@ -15,8 +15,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-
-  const token = localStorage.getItem("token");
+const token = localStorage.getItem("optima_token");
 
   const headers = {
     Authorization: `Bearer ${token}`,

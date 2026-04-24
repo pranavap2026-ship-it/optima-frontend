@@ -1,9 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
+import API from "../../api/api"; // ✅ MUST be at top
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -20,34 +20,37 @@ export default function Login() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  // 🔥 LOGIN FUNCTION
-import API from "../../api/api"; // adjust path
+  // ===============================
+  // 🔐 LOGIN FUNCTION
+  // ===============================
+  const handleLogin = async () => {
+    if (!form.email || !form.password) {
+      return setError("Enter email & password");
+    }
 
-const handleLogin = async () => {
-  if (!form.email || !form.password) {
-    return setError("Enter email & password");
-  }
+    try {
+      setLoading(true);
+      setError("");
 
-  try {
-    setLoading(true);
-    setError("");
+      const res = await API.post("/admin/login", form);
 
-    const res = await API.post("/admin/login", form);
+      // ✅ SAVE TOKEN (must match interceptor)
+      localStorage.setItem("optima_token", res.token);
 
-    // 🔐 SAVE TOKEN (match your interceptor key!)
-    localStorage.setItem("optima_token", res.token);
+      // 🚀 REDIRECT
+      navigate("/admin");
 
-    // 🚀 REDIRECT
-    navigate("/admin");
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  } catch (err) {
-    setError(err.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // 🔥 ENTER KEY SUPPORT
+  // ===============================
+  // ⌨️ ENTER KEY SUPPORT
+  // ===============================
   const handleKey = (e) => {
     if (e.key === "Enter") {
       handleLogin();
@@ -75,7 +78,7 @@ const handleLogin = async () => {
         }}
         onKeyDown={handleKey}
       >
-        {/* 🔥 TITLE */}
+        {/* TITLE */}
         <h2
           className="gold"
           style={{
@@ -87,7 +90,7 @@ const handleLogin = async () => {
           OPTIMA ADMIN
         </h2>
 
-        {/* ❌ ERROR MESSAGE */}
+        {/* ERROR */}
         {error && (
           <p
             style={{
@@ -101,7 +104,7 @@ const handleLogin = async () => {
           </p>
         )}
 
-        {/* 🔥 EMAIL */}
+        {/* EMAIL */}
         <Input
           label="Email"
           placeholder="Enter email"
@@ -109,7 +112,7 @@ const handleLogin = async () => {
           onChange={(v) => setField("email", v)}
         />
 
-        {/* 🔥 PASSWORD */}
+        {/* PASSWORD */}
         <Input
           label="Password"
           type="password"
@@ -118,14 +121,14 @@ const handleLogin = async () => {
           onChange={(v) => setField("password", v)}
         />
 
-        {/* 🔥 BUTTON */}
+        {/* BUTTON */}
         <Button
           label={loading ? "Logging in..." : "Login"}
           onClick={handleLogin}
           full
         />
 
-        {/* 🔥 FOOTER */}
+        {/* FOOTER */}
         <p
           style={{
             textAlign: "center",
